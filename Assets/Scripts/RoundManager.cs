@@ -139,38 +139,41 @@ public class RoundManager : Singleton<RoundManager>
     //}
 
 
-    /// <summary>
-    /// 让 targetFace 正面一次性朝向摄像机，并保证 up 不被翻到反面。
-    /// </summary>
     private IEnumerator RotateFaceToCameraOnce(
-        float duration,
-        Transform rolledTransform,
-        Transform targetFace,
-        Vector3 referenceUp)          // 建议传 Vector3.up；若想和摄像机一致可传 Camera.main.transform.up
+    float duration,
+    Transform rolledTransform,
+    Transform targetFace,
+    Vector3 referenceUp         // 建议仍传 Vector3.up 或 Camera.main.transform.up
+)
     {
         if (!rolledTransform || !targetFace) yield break;
         if (referenceUp.sqrMagnitude < 1e-8f) referenceUp = Vector3.up;
 
-        /* ---------- ① 计算“面 → 摄像机” ---------- */
-        Vector3 dir = Camera.main.transform.forward;//Camera.main.transform.position - targetFace.position;
+        /* ---------- ① 你的 dir 保持不变 ---------- */
+        Vector3 dir = Camera.main.transform.forward;   // 按你现有逻辑
         if (dir.sqrMagnitude < 1e-8f) yield break;
         dir.Normalize();
 
         /* ---------- ② 先让 forward 对准 dir ---------- */
         Quaternion faceWorld = Quaternion.FromToRotation(targetFace.forward, dir) * targetFace.rotation;
 
-        /* ---------- ③ 检查应用后 face 的 up 与 referenceUp 的夹角 ---------- */
-        Vector3 newUp = faceWorld * Vector3.up;               // 这是面在世界中的上方向
-        if (Vector3.Dot(newUp, referenceUp) < 0f)
+        /* ---------- ③ 计算需要补的 roll（delta）并直接并入 faceWorld ---------- */
         {
-            // 说明 up 方向倒立：绕 forward(=dir) 垂直轴翻 180°
-            faceWorld = Quaternion.AngleAxis(180f, dir) * faceWorld;
+            Vector3 newUp = faceWorld * Vector3.up;                 // 应用完 forward 后的世界 up
+            Vector3 projNewUp = Vector3.ProjectOnPlane(newUp, dir);     // 投影到垂直 dir 的平面
+            Vector3 projRefUp = Vector3.ProjectOnPlane(referenceUp, dir);
+
+            float delta = Vector3.SignedAngle(projNewUp, projRefUp, dir);
+            if (Mathf.Abs(delta) > 0.01f)                                // 过滤极小误差
+            {
+                faceWorld = Quaternion.AngleAxis(delta, dir) * faceWorld;
+            }
         }
 
-        /* ---------- ④ 推导父物体目标旋转 ---------- */
+        /* ---------- ④ 推导父物体一次性目标旋转 ---------- */
         Quaternion parentTarget = faceWorld * Quaternion.Inverse(targetFace.localRotation);
 
-        /* ---------- ⑤ 平滑插值 ---------- */
+        /* ---------- ⑤ 平滑插值（一次 Slerp 完成全部旋转） ---------- */
         Quaternion parentStart = rolledTransform.rotation;
         for (float t = 0f; t < duration; t += Time.deltaTime)
         {
@@ -178,6 +181,7 @@ public class RoundManager : Singleton<RoundManager>
             yield return null;
         }
         rolledTransform.rotation = parentTarget;
+
         OnRotationComplete?.Invoke();
     }
 
