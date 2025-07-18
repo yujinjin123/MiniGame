@@ -8,6 +8,7 @@ public class TotalPoint : Singleton<TotalPoint>
     public Text pointIncrease; // 显示加分文本的UI
     public CanvasGroup pointIncreaseCanvasGroup; // 控制透明度的组件
     public static int currentPoint = 0;
+    public Text gameOver;//游戏结束文本
     public float fadeDuration = 1.5f; // 淡出持续时间（秒）
 
     protected override void Awake()
@@ -16,6 +17,15 @@ public class TotalPoint : Singleton<TotalPoint>
         currentPoint = 0;
         pointIncreaseCanvasGroup = pointIncrease.GetComponent<CanvasGroup>();
         pointIncreaseCanvasGroup.alpha = 0; // 初始化时隐藏
+        gameOver = GetComponentInChildren<Text>();
+        gameOver.gameObject.SetActive(false);
+    }
+
+    public void GameOver()
+    {
+        pointText.gameObject.SetActive(false);
+        gameOver.gameObject.SetActive(true);
+        gameOver.text = $"游戏结束\n总得分:{currentPoint}";
     }
 
     public void GetPoint(int num)

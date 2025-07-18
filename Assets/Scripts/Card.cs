@@ -48,9 +48,9 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
 
         // 确保卡牌显示在最上层
         transform.SetParent(transform.root); // 移动到Canvas根节点
-        this.transform.localScale = _originalScale*scaleZoom;
+        this.transform.localScale = _originalScale * scaleZoom;
 
-        
+
     }
 
     //private void Update()
@@ -122,7 +122,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     public void OnEndDrag(PointerEventData eventData)
     {
         if (used) return;
-       
+
         _canvasGroup.alpha = 1f;
         _canvasGroup.blocksRaycasts = true;
 
@@ -130,13 +130,13 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
         Quad dropArea = Detection.curHitQuad;
         ResetHightLight(_lastHighlightedQuads);
 
-        if (CardManager.Instance.cards[CardManager.Instance.curCard] != this||dropArea == null||dropArea.num != -1)
+        if (dropArea == null || dropArea.num != -1)//CardManager.Instance.cards[CardManager.Instance.curCard] != this||
         {
             ResetPosition(); // 返回原位
             return;
         }
 
-        if (dropArea != null && dropArea.CompareTag("Quad")&&RoundManager.Instance.currentSelectedFace==dropArea.face)
+        if (dropArea != null && dropArea.CompareTag("Quad") && RoundManager.Instance.currentSelectedFace == dropArea.face)
         {
             ExecuteCardAction(dropArea); // 执行卡牌效果
         }
@@ -145,7 +145,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
             ResetPosition(); // 返回原位
         }
 
-        
+
     }
 
     public void ResetHightLight(List<Quad> quads)
@@ -212,7 +212,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     public void ShowCard()
     {
         // 1. 恢复原始缩放
-        transform.localScale = _originalScale;  
+        transform.localScale = _originalScale;
         // 2. 启用交互
         _canvasGroup.blocksRaycasts = true;
         _canvasGroup.interactable = true;
@@ -240,6 +240,6 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     public void SetNum(int num)
     {
         this.num = num;
-        this.text.text= num.ToString();
+        this.text.text = num.ToString();
     }
 }
