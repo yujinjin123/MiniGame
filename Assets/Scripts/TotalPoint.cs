@@ -17,15 +17,15 @@ public class TotalPoint : Singleton<TotalPoint>
         currentPoint = 0;
         pointIncreaseCanvasGroup = pointIncrease.GetComponent<CanvasGroup>();
         pointIncreaseCanvasGroup.alpha = 0; // 初始化时隐藏
-        gameOver = GetComponentInChildren<Text>();
         gameOver.gameObject.SetActive(false);
     }
 
     public void GameOver()
     {
-        pointText.gameObject.SetActive(false);
+        pointText.text = "";
         gameOver.gameObject.SetActive(true);
         gameOver.text = $"游戏结束\n总得分:{currentPoint}";
+
     }
 
     public void GetPoint(int num)
