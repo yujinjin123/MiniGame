@@ -10,6 +10,7 @@ public class TotalPoint : Singleton<TotalPoint>
     public static int currentPoint = 0;
     public Text gameOver;//游戏结束文本
     public float fadeDuration = 1.5f; // 淡出持续时间（秒）
+    public GameObject cardsPanel;
 
     protected override void Awake()
     {
@@ -25,7 +26,7 @@ public class TotalPoint : Singleton<TotalPoint>
         pointText.text = "";
         gameOver.gameObject.SetActive(true);
         gameOver.text = $"游戏结束\n总得分:{currentPoint}";
-
+        cardsPanel.SetActive(false);
     }
 
     public void GetPoint(int num)
